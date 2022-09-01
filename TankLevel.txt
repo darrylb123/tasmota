@@ -1,0 +1,291 @@
+#Tank level using pressure transmitter
+on tele-analog#a0 do backlog scale1 %value%, 157, 930, 0, 100 ; publish stat/tank_percent/RESULT %var1% endon
+
+# Read ADC (0-1V) and scale for 16V (1k/15k Resistor divider)
+Rule1 
+on var1#state do teleperiod %value% endon
+on tele-analog#a0 do backlog  publish stat/water_battery_volts/RESULT %var2% ; scale2 %value%, 0, 1040, 0, 16  endon
+
+
+#Using SR04 ultrasonic for level (Lifted from Tasmota-Rules)
+Rule1
+  ON tele-SR04#distance DO Backlog var1 %value%; publish stat/tank_level/distance %value% ; event senddistance ENDON
+  ON event#senddistance DO Backlog SCALE1 %var1%, 224, 24, 0, 100; event pubdata ENDON
+  ON event#pubdata DO backlog publish stat/tank_percent/RESULT %var1%; counter1 %var1% ENDON
+
+Rule1 1
+
+# Counter for rainfall
+Rule2
+on Counter#C2!=%var2% do Backlog var2 %value%; event mm ENDON
+on event#mm do Backlog scale3 %var2%, 0,1000,0,267; event pubmm ENDON
+on event#pubmm do publish stat/rain/mm %var3% endon
+ON Time#Minute DO Backlog publish stat/rain/mm %var3% ; publish stat/rain/counter %var2% ENDON
+ON Time#Minute=5 DO Counter2 0 ENDON
+
+Rule2 1
+
+Node Red Config
+[
+    {
+        "id": "50eb1dfb.ad57c4",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "9a86ce46.5c773",
+        "type": "mqtt in",
+        "z": "50eb1dfb.ad57c4",
+        "name": "Tank Level",
+        "topic": "stat/tank_percent/RESULT",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "8cfed468.993ac8",
+        "x": 140,
+        "y": 180,
+        "wires": [
+            [
+                "19d26a49.c6e646",
+                "59b168f31b9a2724"
+            ]
+        ]
+    },
+    {
+        "id": "19d26a49.c6e646",
+        "type": "smooth",
+        "z": "50eb1dfb.ad57c4",
+        "name": "Filter Noise",
+        "property": "payload",
+        "action": "low",
+        "count": "10",
+        "round": "1",
+        "mult": "single",
+        "reduce": false,
+        "x": 350,
+        "y": 180,
+        "wires": [
+            [
+                "6f202689.a69608",
+                "ca6b90bd.b9ca8"
+            ]
+        ]
+    },
+    {
+        "id": "f49925dc.a3d9b8",
+        "type": "trigger",
+        "z": "50eb1dfb.ad57c4",
+        "name": "Low Level Alarm",
+        "op1": "",
+        "op2": "",
+        "op1type": "nul",
+        "op2type": "payl",
+        "duration": "1",
+        "extend": false,
+        "overrideDelay": false,
+        "units": "hr",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 1400,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "dc65e90b.d7a1a8",
+        "type": "e-mail",
+        "z": "50eb1dfb.ad57c4",
+        "server": "smtp.gmail.com",
+        "port": "465",
+        "secure": true,
+        "tls": true,
+        "name": "darryl.bond@gmail.com",
+        "dname": "Email Error",
+        "x": 1610,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "6f202689.a69608",
+        "type": "mqtt out",
+        "z": "50eb1dfb.ad57c4",
+        "name": "Smoothed Tank Level",
+        "topic": "stat/tank_percent/filtered",
+        "qos": "0",
+        "retain": "true",
+        "broker": "8cfed468.993ac8",
+        "x": 700,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "79479d0e.1486f4",
+        "type": "mqtt out",
+        "z": "50eb1dfb.ad57c4",
+        "name": "Low Level Alarm",
+        "topic": "stat/tank_low/alarm",
+        "qos": "0",
+        "retain": "true",
+        "broker": "8cfed468.993ac8",
+        "x": 1620,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "be0952f6.99d22",
+        "type": "inject",
+        "z": "50eb1dfb.ad57c4",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Tank Low Level",
+        "payloadType": "str",
+        "x": 1380,
+        "y": 120,
+        "wires": [
+            [
+                "79479d0e.1486f4"
+            ]
+        ]
+    },
+    {
+        "id": "ca6b90bd.b9ca8",
+        "type": "function",
+        "z": "50eb1dfb.ad57c4",
+        "name": "Tank High/Low Level?",
+        "func": "var level = msg.payload;\nvar high;\nif(level < 60){\n    msg.payload = \"WoopWoopWoop Tank Level Low (\" + level + \"%)\";\n    return[msg,high];\n} \nmsg = null;\nif(level > 98){\n    high = { payload : true };\n    return[msg,high];\n} else {\n    msg.reset = true;\n    high.reset = true;\n    return[msg,high];\n}\nreturn;",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 180,
+        "wires": [
+            [
+                "f49925dc.a3d9b8"
+            ],
+            [
+                "2041092c.001396",
+                "ae81cdd9.a43fe"
+            ]
+        ]
+    },
+    {
+        "id": "931c31bf.7ab03",
+        "type": "mqtt out",
+        "z": "50eb1dfb.ad57c4",
+        "name": "High Level",
+        "topic": "stat/tank/high",
+        "qos": "2",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8cfed468.993ac8",
+        "x": 1610,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "2041092c.001396",
+        "type": "trigger",
+        "z": "50eb1dfb.ad57c4",
+        "name": "",
+        "op1": "",
+        "op2": "",
+        "op1type": "nul",
+        "op2type": "payl",
+        "duration": "250",
+        "extend": false,
+        "overrideDelay": false,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 1150,
+        "y": 260,
+        "wires": [
+            [
+                "931c31bf.7ab03"
+            ]
+        ]
+    },
+    {
+        "id": "ae81cdd9.a43fe",
+        "type": "debug",
+        "z": "50eb1dfb.ad57c4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1290,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "59b168f31b9a2724",
+        "type": "debug",
+        "z": "50eb1dfb.ad57c4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 400,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "8cfed468.993ac8",
+        "type": "mqtt-broker",
+        "name": "thebonds",
+        "broker": "mqtt.thebonds.lan",
+        "port": "1883",
+        "clientid": "thebonds",
+        "usetls": false,
+        "compatmode": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    }
+]

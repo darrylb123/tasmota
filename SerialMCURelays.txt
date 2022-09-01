@@ -1,0 +1,4 @@
+Rule1
+on Power1#State=1 do SerialSend5 A00101A2 endon on Power1#State=0 do SerialSend5 A00100A1 endon on Power2#State=1 do SerialSend5 A00201A3 endon on Power2#State=0 do SerialSend5 A00200A2 endon
+
+Rule1 1

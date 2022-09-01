@@ -1,0 +1,3 @@
+Rule1
+ON system#boot DO backlog power1 %mem1%; mem1 1;ruletimer1 20 endon
+on rules#timer=1 do mem1 0 endon

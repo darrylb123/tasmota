@@ -1,0 +1,7 @@
+rule1 
+on System#Boot do POWER = off; mem2 3600 endon
+
+rule2
+ON Power1#state=1 DO RuleTimer1 %mem2% ENDON   
+ON Rules#Timer=1 DO Power1 off ENDON
+on time#minute publish tele/borepump/STATE

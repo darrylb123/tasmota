@@ -1,0 +1,19 @@
+Men's Shed Tank Level
+
+DisplayWidth 128
+DisplayHeight 64
+DisplayType 0
+DisplayRows 2
+Calcres 0
+
+Rule1 
+ON tele-SR04#distance DO Backlog var1 %value%; event senddistance ENDON   
+ON event#senddistance DO Backlog SCALE1 %var1%, 244, 24, 0, 100; event pubdata  endon
+ON event#pubdata DO backlog DisplayText [zf4s2]%var1%%; counter1 %var1% endon
+
+
+
+Rule1 1
+
+
+displaytext [zx0S3] Test

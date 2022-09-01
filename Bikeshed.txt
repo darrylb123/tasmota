@@ -1,0 +1,11 @@
+BikeShedExt
+# Button single press toggles the external light
+# Button double press toggles the internal light
+# turn on double click 
+Backlog ButtonTopic 0;  SetOption73 1; SetOption32 20
+rule1
+ON button1#state=10 DO power1 2 ENDON   ON button1#state=11 DO Websend [192.168.12.50] power1 toggle ENDON
+
+BikeShedInt
+rule1
+ON switch2#state DO backlog publish stat/BikeShedLights/door %value% ; power1 %value% ENDON
