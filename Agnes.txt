@@ -1,32 +1,57 @@
-Pump controller (172.23.1.20)
-on system#boot do backlog power1 0 ; power2 0 ; websend [172.23.1.21] power1 0 ; websend [172.23.1.21] power2 0 ; var1 0 endon
-rule1
-on var1#state>0 do power1 1 endon
-on var1#state<=0 do  backlog power1 0 ; var1 0 endon
-on power2#state==1 do add1 1 endon
-on power2#state==0 do sub1 1 endon
-on power1#state==1 do  rulestimer1 3600 endon
-on power2#state==1 do  rulestimer1 3600 endon
-on rules#timer=1 do backlog power1 0; power2 0; var1 0 endon
-rule1 1
+#Pump controller (172.23.1.20)
+#on system#boot do backlog power1 0 ; power2 0 ; websend [172.23.1.21] power1 0 ; websend [172.23.1.21] power2 0 ; var1 0 endon
+#rule1
+#on system#boot do backlog power1 0 ; power2 0 ; websend [172.23.1.21] power1 0 ; websend [172.23.1.21] power2 0 ; var1 0 endon
+#on var1#state>0 do power1 1 endon
+#on var1#state<=0 do  backlog power1 0 ; var1 0 endon
+#on power2#state==1 do add1 1 endon
+#on power2#state==0 do sub1 1 endon
+von power1#state=1 do  rulestimer1 3600 endon
+#on power2#state==1 do  rulestimer1 3600 endon
+von rules#timer=1 do backlog power1 0; power2 0; var1 0 endon
+#rule1 1
 
 Valve Controller (172.23.1.21)
 rule1
-on system#boot do backlog power1 0 ; power2 0 ; websend [172.23.1.20] power1 0 ; websend [172.23.1.20] var1 0 ; websend [172.23.1.21] power2 0 
-on power1#state==1 do backlog websend [172.23.1.20] add1 1 ; rulestimer1 3600 endon
+on system#boot do backlog power1 0 ; power2 0 ; websend [172.23.1.20] power1 0 ; websend [172.23.1.20] var1 0 ; websend [172.23.1.20] power2 0 endon
+on power1#state==1 do websend [172.23.1.20] add1 1  endon
 on power1#state==0 do websend [172.23.1.20] sub1 1 endon
-on power2#state==1 do backlog websend [172.23.1.20] add1 1; rulestimer1 3600 endon
+on power2#state==1 do websend [172.23.1.20] add1 1 endon
 on power2#state==0 do websend [172.23.1.20] sub1 1 endon
-on rules#timer=1 do backlog power1 0; power2 0 endon
+
 rule1 1
 
+rule2
+on power1#state==1 do  ruletimer1 5400 endon
+on power2#state==1 do  ruletimer1 1500 endon
+on rules#timer=1 do backlog power1 0; power2 0 endon
+
+rule2 1
 
 
 Remote Control
 rule1
 on button1#state do websend [172.23.1.20] power1 2 endon
 on button2#state do websend [172.23.1.20] power2 2 endon
-on button2#state do websend [172.23.1.21] power1 2 endon
-on button2#state do websend [172.23.1.21] power2 2 endon
+on button3#state do websend [172.23.1.21] power1 2 endon
+on button4#state do websend [172.23.1.21] power2 2 endon
 
 rule1 1
+
+
+
+
+Pump controller (172.23.1.20)
+rule1
+on system#boot do backlog power1 0 ; power2 0 ; websend [172.23.1.21] power1 0 ; websend [172.23.1.21] power2 0 ; var1 0 endon
+on power2#state==1 do add1 1 endon
+on power2#state==0 do sub1 1 endon
+on var1#state>0 do power1 1 endon
+on var1#state<=0 do  backlog power1 0 endon
+
+rule2
+on power1#state=1 do  ruletimer1 7200 endon
+on power2#state==1 do  ruletimer1 900 endon
+on rules#timer=1 do backlog power1 0; power2 0; var1 0 endon
+
+rule2 1
