@@ -23,8 +23,9 @@ rule1 1
 
 rule2
 on power1#state==1 do  ruletimer1 5400 endon
-on power2#state==1 do  ruletimer1 1500 endon
-on rules#timer=1 do backlog power1 0; power2 0 endon
+on power2#state==1 do  ruletimer2 1500 endon
+on rules#timer=1 do backlog power1 0 endon
+on rules#timer=2 power2 0 endon
 
 rule2 1
 
@@ -51,7 +52,8 @@ on var1#state<=0 do  backlog power1 0 endon
 
 rule2
 on power1#state=1 do  ruletimer1 7200 endon
-on power2#state==1 do  ruletimer1 900 endon
-on rules#timer=1 do backlog power1 0; power2 0; var1 0 endon
+on power2#state==1 do  ruletimer2 900 endon
+on rules#timer=1 do power1 0 endon
+on rules#timer=2 power2 0 endon
 
 rule2 1
