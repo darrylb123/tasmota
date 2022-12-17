@@ -1,0 +1,6 @@
+# Follow pressure switch - inverted
+SwitchMode 2
+
+# Set pump state at boot 
+Rule1 1
+Rule1 ON Switch1#Boot DO Power1 %value% ENDON

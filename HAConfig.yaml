@@ -1,0 +1,371 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+mobile_app:
+discovery:
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+sensor WaterTank:
+    platform: mqtt
+    unique_id: water_tank_level
+    state_topic: "stat/tank_percent/filtered"
+    name: "Tank Level"
+    unit_of_measurement: "%"
+
+sensor WaterTankLevel:
+    platform: mqtt
+    unique_id: water_tank_distance
+    state_topic: "stat/tank_level/filtered"
+    name: "Tank Water Distance"
+    unit_of_measurement: "cm"
+    
+sensor TotalLitres:
+    platform: mqtt
+    unique_id: total_water_flow
+    state_topic: "stat/flowmeter/litres"
+    name: "Total Flow"
+    unit_of_measurement: "litres"
+    
+sensor WaterOutcome:
+    platform: mqtt
+    unique_id: watering_outcome
+    state_topic: "stat/water/outcome"
+    name: "Watering Outcome"
+    
+sensor SystemBatteryVolts:
+    platform: mqtt
+    unique_id: system_battery_volts
+    state_topic: "stat/water_battery_volts/RESULT"
+    name: "System Battery"
+    unit_of_measurement: "volts"
+    
+sensor WaterLPM:
+    platform: mqtt
+    unique_id: water_lpm
+    state_topic: "stat/flowmeter/lpm"
+    name: "Water LPM"
+    unit_of_measurement: "l/min"
+    
+binary_sensor Pump:
+    platform: mqtt
+    unique_id: water_pump
+    state_topic: "stat/WATER/6"
+    name: "Water Pump"
+    
+binary_sensor Front:
+    platform: mqtt
+    unique_id: back_valve
+    state_topic: "stat/WATER/7"
+    name: "Back Valve"
+    
+binary_sensor Back:
+    platform: mqtt
+    unique_id: front_valve
+    state_topic: "stat/WATER/8"
+    name: "Front Valve"    
+
+mqtt:
+    binary_sensor:
+    -   unique_id: bike_pa_door
+        name: "Bike Shed PA Door"
+        state_topic: "stat/BikeShed/PADoor"
+    -   unique_id: bike_roller_door
+        name: "Bike Shed Roller Door"
+        state_topic: "stat/BikeShed/RollerDoor"
+
+switch:
+  - platform: mqtt
+    unique_id: bathroom_switch
+    name: "Bathroom Switch"
+    state_topic: "stat/QWERT/1"
+    command_topic: "cmnd/QWERT/1"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: 0
+    retain: true
+  - platform: mqtt
+    unique_id: bedroom_switch
+    name: "Bedroom Switch"
+    state_topic: "stat/QWERT/2"
+    command_topic: "cmnd/QWERT/2"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: 0
+    retain: true
+  - platform: mqtt
+    unique_id: water_back
+    name: "Water Back"
+    state_topic: "stat/WATER/7"
+    command_topic: "cmnd/water/control"
+    payload_on: '{"state": "start","area":"back","timeout":45,"totalLitres":500, "maxlpm":18}'
+    payload_off: '{ "state": "stop" }'
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: 0
+  - platform: mqtt
+    unique_id: water_front
+    name: "Water Front"
+    state_topic: "stat/WATER/8"
+    command_topic: "cmnd/water/control"
+    payload_on: '{"state": "start","area":"front","timeout":45,"totalLitres":500, "maxlpm":20}'
+    payload_off: '{ "state": "stop" }'
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: 0
+sensor Solar:
+  - platform: mqtt
+    unique_id: inverter_sunrise
+    state_topic: "sbfspot"
+    name: "Inverter Sunrise"
+    value_template: "{{ value_json.SunRise }}"
+  - platform: mqtt
+    unique_id: inverter_sunset
+    state_topic: "sbfspot"
+    name: "Inverter Sunset"
+    value_template: "{{ value_json.SunSet }}"
+  - platform: mqtt
+    unique_id: inverter_status
+    state_topic: "sbfspot"
+    name: "Inverter Status"
+    value_template: "{{ value_json.InvStatus }}"
+  - platform: mqtt
+    unique_id: inverter_temp
+    state_topic: "sbfspot"
+    name: "Inverter Temperature"
+    value_template: "{{ value_json.InvTemperature }}"
+    unit_of_measurement: '°F'
+    device_class: temperature
+  - platform: mqtt
+    unique_id: inverter_contactor
+    state_topic: "sbfspot"
+    name: "Inverter Grid Relay/Contactor"
+    value_template: "{{ value_json.InvGridRelay }}"
+  - platform: mqtt
+    unique_id: inverter_total_yield
+    state_topic: "sbfspot"
+    name: "Inverter Total Yeld"
+    value_template: "{{ value_json.ETotal }}"
+    unit_of_measurement: 'kWh'
+    icon: mdi:solar-power
+  - platform: mqtt
+    state_topic: "sbfspot"
+    name: "Inverter Today Yeld"
+    value_template: "{{ value_json.EToday }}"
+    unit_of_measurement: 'kWh'
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: inverter_instant_power
+    state_topic: "sbfspot"
+    name: "Inverter Instant Power"
+    value_template: "{{ value_json.PACTot | int }}"
+    unit_of_measurement: 'W'
+    device_class: power
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: dc_power_1
+    state_topic: "sbfspot"
+    name: "DC Power String 1"
+    value_template: "{{ value_json.PDC1 }}"
+    unit_of_measurement: 'W'
+    device_class: power
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: dc_power_2
+    state_topic: "sbfspot"
+    name: "DC Power String 2"
+    value_template: "{{ value_json.PDC2 }}"
+    unit_of_measurement: 'W'
+    device_class: power
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: dc_voltage_1
+    state_topic: "sbfspot"
+    name: "DC Voltage String 1"
+    value_template: "{{ value_json.UDC1 }}"
+    unit_of_measurement: 'V'
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: dc_voltage_2
+    state_topic: "sbfspot"
+    name: "DC Voltage String 2"
+    value_template: "{{ value_json.UDC2 }}"
+    unit_of_measurement: 'V'
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: dc_current_1
+    state_topic: "sbfspot"
+    name: "DC Current String 1"
+    value_template: "{{ value_json.IDC1 }}"
+    unit_of_measurement: 'A'
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: dc_current_2
+    state_topic: "sbfspot"
+    name: "DC Current String 2"
+    value_template: "{{ value_json.IDC2 }}"
+    unit_of_measurement: 'A'
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: inverter_op_time
+    state_topic: "sbfspot"
+    name: "Inverter Operating time"
+    value_template: "{{ value_json.OperTm }}"
+    unit_of_measurement: 's'
+  - platform: mqtt
+    unique_id: inverter_feedin_time
+    state_topic: "sbfspot"
+    name: "Inverter Feed-in time"
+    value_template: "{{ value_json.FeedTm }}"
+    unit_of_measurement: 's'
+  - platform: mqtt
+    unique_id: ac_power_l1
+    state_topic: "sbfspot"
+    name: "AC Power L1"
+    value_template: "{{ value_json.PAC1 }}"
+    unit_of_measurement: 'W'
+    device_class: power
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: ac_power_l2
+    state_topic: "sbfspot"
+    name: "AC Power L2"
+    value_template: "{{ value_json.PAC2 }}"
+    unit_of_measurement: 'W'
+    device_class: power
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: ac_power_l3
+    state_topic: "sbfspot"
+    name: "AC Power L3"
+    value_template: "{{ value_json.PAC3 }}"
+    unit_of_measurement: 'W'
+    device_class: power
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: ac_voltage_l1
+    state_topic: "sbfspot"
+    name: "AC Voltage L1"
+    value_template: "{{ value_json.UAC1 }}"
+    unit_of_measurement: 'V'
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: ac_voltage_l2
+    state_topic: "sbfspot"
+    name: "AC Voltage L2"
+    value_template: "{{ value_json.UAC2 }}"
+    unit_of_measurement: 'V'
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: ac_voltage_l3
+    state_topic: "sbfspot"
+    name: "AC Voltage L3"
+    value_template: "{{ value_json.UAC3 }}"
+    unit_of_measurement: 'V'
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: ac_current_l1
+    state_topic: "sbfspot"
+    name: "AC Current L1"
+    value_template: "{{ value_json.IAC1 }}"
+    unit_of_measurement: 'A'
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: ac_current_l2
+    state_topic: "sbfspot"
+    name: "AC Current L2"
+    value_template: "{{ value_json.IAC2 }}"
+    unit_of_measurement: 'A'
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: ac_current_l3
+    state_topic: "sbfspot"
+    name: "AC Current L3"
+    value_template: "{{ value_json.IAC3 }}"
+    unit_of_measurement: 'A'
+    icon: mdi:solar-power
+  - platform: mqtt
+    unique_id: inverter_grid_frequency
+    state_topic: "sbfspot"
+    name: "Inverter Grid Frequency"
+    value_template: "{{ value_json.GridFreq }}"
+    unit_of_measurement: 'hz'
+    icon: mdi:solar-power
+  - platform: mqtt
+    name: "PWS Barometer"
+    state_topic: "pws/sensors/baromin"
+    unit_of_measurement: 'HPa'
+  - platform: mqtt
+    name: "PWS Outside Temperature"
+    state_topic: "pws/sensors/temp"
+    unit_of_measurement: 'C'
+  - platform: mqtt
+    name: "PWS Dew Point"
+    state_topic: "pws/sensors/dewpt"
+    unit_of_measurement: 'C'
+  - platform: mqtt
+    name: "PWS Outside Humidity"
+    state_topic: "pws/sensors/humidity"
+    unit_of_measurement: '%'
+  - platform: mqtt
+    name: "PWS Wind speed"
+    state_topic: "pws/sensors/windspeedkph"
+    unit_of_measurement: 'KMh'
+  - platform: mqtt
+    name: "PWS Wind Gust speed"
+    state_topic: "pws/sensors/windgustkph"
+    unit_of_measurement: 'KMh'
+  - platform: mqtt
+    name: "PWS Wind direction"
+    state_topic: "pws/sensors/winddir"
+    unit_of_measurement: ''
+  - platform: mqtt
+    name: "PWS Rain"
+    state_topic: "pws/sensors/rainmm"
+    unit_of_measurement: 'mm/hr'
+  - platform: mqtt
+    name: "PWS Daily Rain"
+    state_topic: "pws/sensors/dailyrainmm"
+    unit_of_measurement: 'mm'
+  - platform: mqtt
+    name: "PWS Weekly Rain"
+    state_topic: "pws/sensors/weeklyrainmm"
+    unit_of_measurement: 'mm'
+  - platform: mqtt
+    name: "PWS Monthly Rain"
+    state_topic: "pws/sensors/monthlyrainmm"
+    unit_of_measurement: 'm'
+  - platform: mqtt
+    name: "PWS Indoor Temperature"
+    state_topic: "pws/sensors/indoortemp"
+    unit_of_measurement: 'C'
+  - platform: mqtt
+    name: "PWS Indoor Humidity"
+    state_topic: "pws/sensors/indoorhumidity"
+    unit_of_measurement: '%'
+  - platform: mqtt
+    name: "New Rain Gauge Counter"
+    state_topic: "stat/rain/counter"
+    unit_of_measurement: 'Pulses'
+  - platform: mqtt
+    name: "New Rain Gauge mm"
+    state_topic: "stat/rain/mm"
+    unit_of_measurement: 'mm'
+  - platform: mqtt
+    name: "Men's Shed Tank Level"
+    state_topic: "stat/MensShedTank/level"
+    unit_of_measurement: "%"
+    

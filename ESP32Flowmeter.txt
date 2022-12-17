@@ -1,0 +1,46 @@
+#Set 1 decimal place
+Calcres 1
+rule1
+on time#minute=0 do backlog counter2 0 endon
+
+rule1 1
+on tele-counter#c2 do backlog scale2 %value%, 0, 1024, 0, 3.1 ; publish stat/tank_flow/RESULT %var2% endon
+
+Berry Code: 
+
+
+
+
+#######################################################################################
+# autoexec.be
+#######################################################################################
+load("flowmeter.be")
+each_minute()
+
+#######################################################################################
+Rain Gauge
+SPECIFICATIONS
+Inner Diameter: 4 mm
+Outside diameter: 7 mm
+Proof Water Pressure: <0.8 MPa
+Water Flow Range: 0.3-6 L/min
+Voltage Range: 5~12 V
+Operating Current: 15 mA (DC 5V)
+Insulation Resistance: >100 MΩ
+Accuracy: ±5% (0.3-3L/min)
+The Output Pulse High Level: >4.5 VDC (DC input voltage 5 V)
+The Output Pulse Low Level: <0.5 VDC (DC input voltage 5 V)
+Output Pulse Duty Ratio: 50% ± 10%
+Water-flow Formula: 1L = 5880 square waves
+Working Humidity Range: 35% ~ 90% RH (no frost)
+Dimension: 58*35*26 mm/2.28*1.37*1.02 inches
+
+140mm funnel
+Area of funnel: 7cm ^2 * pi = 153.938
+Volume of 1mm (0.1cm): 15.3938
+Flowmeter 15.3938/1000 * 5880 = 91.1 pulses/mm rainfall
+
+215mm Funnel
+Area of funnel: 10.75cm ^2 * pi = 363
+Volume of 1mm (0.1cm): 36.3
+180ml = 5mm rain = 31 pulses
