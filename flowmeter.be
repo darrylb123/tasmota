@@ -19,8 +19,10 @@ var rain_total = 0
 var ten_min_count = 0
 var pulses_per_l = 255.0
 # Initialise the json messages, replaced with the real ones later
-var water_msg = {'state': "",'area':"",'timeout':0,'totalLitres':0, '"maxlpm':0,'endcount':0,"highflow':false,'stopcause':""}
-var flow_msg = {'LPM':0,'Count':0,'Change':0,'Litres':0}
+var water_msg = map()
+var flow_msg = map()
+water_msg = {'state': "",'area':"",'timeout':0,'totalLitres':0, 'maxlpm':0,'endcount':0,'highflow':false,'stopcause':""}
+flow_msg = {'lpm':0,'Count':0,'Change':0,'Litres':0}
 var front = 2
 var back = 3
 var pump = 4
@@ -91,8 +93,9 @@ def water_flow()
 		old_water_count = counter
 		var output_str = string.format("Total Count %d Watering Flow Pulses: %d LPM: %3.1f",counter,change_count,l_per_min)
 		log(output_str)
-		flow_msg = json.dump({ "LPM":l_per_min,"Count":counter,"Change":change_count,"Litres":water_litres})
-		mqtt.publish("stat/ShedIO/watering",flow_msg)	
+		var mqtt_msg = json.dump({ "lpm":l_per_min,"Count":counter,"Change":change_count,"Litres":water_litres})
+		flow_msg = json.load(mqtt_msg)
+		mqtt.publish("stat/ShedIO/watering",mqtt_msg)	
 	end
 end
 
@@ -138,12 +141,13 @@ def water_mgmt()
 		var endcount = water_msg['endcount']
 		var actual = sensors['COUNTER']['C1']
 		if endcount < actual
+			print("volume exceeded")
 			end_watering("Flow Target Reached")	
 		end
 		var maxlpm = water_msg['maxlpm']
-		var LPM = flow_msg['LPM']
+		var lpm = flow_msg['lpm']
 		var highflow = water_msg['highflow']
-		if  (maxlpm < LPM) && highflow
+		if  (maxlpm < lpm) && highflow
 			end_watering("Stopped on high flow")
 		end
 	end
@@ -174,7 +178,7 @@ def water_message(topic, idx, payload_s, payload_b)
 	return true
 end
 def subscribes()
-  mqtt.subscribe("cmnd/bullshit/control",water_message)
+  mqtt.subscribe("cmnd/water/control",water_message)
 end
 
 tasmota.add_rule("MQTT#Connected=1", subscribes)
