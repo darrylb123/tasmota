@@ -9,3 +9,16 @@ ON button1#state=10 DO power1 2 ENDON   ON button1#state=11 DO Websend [192.168.
 BikeShedInt
 rule1
 ON switch2#state DO backlog publish stat/BikeShedLights/door %value% ; power1 %value% ENDON
+
+
+
+BikeShed
+Backlog ButtonTopic 0;  SetOption73 1; SetOption32 20
+rule1
+ON button1#state=10 DO power1 2 ENDON   
+ON button1#state=11 DO power2 2 ENDON
+on switch3#state=0 do backlog power2 0; publish tele/BikeShed/SENSOR {"Switch3":"OFF"}  ENDON
+on switch3#state=1 do backlog power2 1; publish tele/BikeShed/SENSOR {"Switch3":"ON"}  ENDON
+on switch2#state=0 do backlog power2 0; publish tele/BikeShed/SENSOR {"Switch2":"OFF"}  ENDON
+on switch2#state=1 do backlog power2 1; publish tele/BikeShed/SENSOR {"Switch2":"ON"}  ENDON
+

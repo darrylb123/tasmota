@@ -150,6 +150,10 @@ def water_mgmt()
 		if  (maxlpm < lpm) && highflow
 			end_watering("Stopped on high flow")
 		end
+	else # if both valves are closed stop pump
+		if relays[pump]
+			tasmota.set_power(pump,false)
+		end
 	end
 end
 
