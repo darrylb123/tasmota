@@ -120,7 +120,7 @@ def end_watering(cause)
 	tasmota.set_timer(2000,close_valves)
 	log(cause)
 	water_msg['stopcause'] = cause 
-	# mqtt.publish("stat/ShedIO/watering",water_msg)
+	mqtt.publish("result/ShedIO/watering",json.dump(water_msg))
 end
 
 # stop watering on timeout
@@ -138,17 +138,21 @@ end
 def water_mgmt()
 	var relays = tasmota.get_power()
 	if relays[front] == true || relays[back] == true 
-		var endcount = water_msg['endcount']
-		var actual = sensors['COUNTER']['C1']
-		if endcount < actual
-			print("volume exceeded")
-			end_watering("Flow Target Reached")	
-		end
-		var maxlpm = water_msg['maxlpm']
-		var lpm = flow_msg['lpm']
-		var highflow = water_msg['highflow']
-		if  (maxlpm < lpm) && highflow
-			end_watering("Stopped on high flow")
+		# Start message only
+		if water_msg.contains('endcount') 
+			var endcount = water_msg['endcount']
+			var actual = sensors['COUNTER']['C1']
+			if endcount < actual
+				print("Volume exceeded")
+				end_watering("Flow Target Reached")	
+			end
+
+			var maxlpm = water_msg['maxlpm']
+			var lpm = flow_msg['lpm']
+			var highflow = water_msg['highflow']
+			if  (maxlpm < lpm) && highflow
+				end_watering("Stopped on high flow")
+			end
 		end
 	else # if both valves are closed stop pump
 		if relays[pump]
@@ -160,10 +164,10 @@ end
 # '{"state": "start","area":"front","timeout":150,"totalLitres":2000, "maxlpm":24}'
 def water_message(topic, idx, payload_s, payload_b)
 	water_msg = json.load(payload_s)
-	water_msg.insert('endcount',water_msg['totalLitres']*pulses_per_l)
-	water_msg.insert('highflow',false)
-	water_msg.insert('stopcause', "In Progress" )
 	if water_msg['state'] == "start"
+		water_msg.insert('endcount',water_msg['totalLitres']*pulses_per_l)
+		water_msg.insert('highflow',false)
+		water_msg.insert('stopcause', "In Progress" )
 		tasmota.set_timer(water_msg['timeout']*60000,water_timeout)
 		tasmota.set_timer(300000,high_flow)
 		if water_msg['area'] == "front"
@@ -175,10 +179,10 @@ def water_message(topic, idx, payload_s, payload_b)
 			tasmota.set_timer(2000,start_pump)
 		end
 		tasmota.cmd("COUNTER1 0")
+		mqtt.publish("result/ShedIO/watering",json.dump(water_msg))
 	else
 		end_watering("Stop Requested")
 	end
-	
 	return true
 end
 def subscribes()
