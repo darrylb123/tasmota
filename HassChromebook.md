@@ -12,12 +12,7 @@ Ref: https://www.techrepublic.com/article/install-docker-chromeos/
 ```
 $ sudo apt update
 $ sudo apt upgrade
-$ sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y
-$ curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
-$ sudo apt-key fingerprint 0EBFCD88
-$ sudo add-apt-repository “deb https://download.docker.com/linux/debian $(lsb_release -cs) stable”
-$ sudo apt-get update
-$ sudo apt-get install docker-ce docker-ce-cli containerd.io -y
+$ sudo apt install docker.io btrfs-progs -y
 $ sudo usermod -aG docker $USER
 
 ```
@@ -45,7 +40,7 @@ allow_anonymous true
 ```
 Start the mosquitto broker
 ```
-$ sudo systemctl start mosquitto
+$ sudo systemctl restart mosquitto
 ```
 
 With the ports forwarded from step 1 homeassistant and mqtt broker should be accessible from other computers on the network.
