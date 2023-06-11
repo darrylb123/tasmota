@@ -1,0 +1,31 @@
+
+ alias: Bore Pump 
+  description: Run Borepump
+  trigger:
+  - platform: numeric_state
+    entity_id: input_number.borepumpminutes
+    above: '0'
+  condition: []
+  - repeat:
+      until:
+      - condition: numeric_state
+        entity_id: input_number.borepumpminutes
+        below: '1'
+      sequence:
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+      - service: input_number.set_value
+        data:
+          value: '{{ (states("input_number.borepumpminutes") |int ) - 1 }}'
+        target:
+          entity_id: input_number.borepumpminutes
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id:
+      - switch.shedio_2
+   mode: single
+

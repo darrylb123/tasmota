@@ -53,7 +53,8 @@ def tank_flow()
 end
 
 def rain_gauge()
-	var pulses_per_mm = 7.75 # 279 pulses for 36mm
+	# var pulses_per_mm = 7.75 # 279 pulses for 36mm
+	var pulses_per_mm = 8.66 # 416 pulses for 48mm
 	var counter = sensors['COUNTER']['C3']
 	if counter != old_mm_count || ten_min_count > 50
 		if counter<old_mm_count
