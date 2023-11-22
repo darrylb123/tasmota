@@ -1,3 +1,4 @@
+
 #Tank level using pressure transmitter
 on tele-analog#a0 do backlog scale1 %value%, 157, 930, 0, 100 ; publish stat/tank_percent/RESULT %var1% endon
 
@@ -8,6 +9,7 @@ on tele-analog#a0 do backlog  publish stat/water_battery_volts/RESULT %var2% ; s
 
 
 #Using SR04 ultrasonic for level (Lifted from Tasmota-Rules)
+# Requires tasmota.sensors for SR04
 Rule1
   ON tele-SR04#distance DO Backlog var1 %value%; publish stat/tank_level/distance %value% ; event senddistance ENDON
   ON event#senddistance DO Backlog SCALE1 %var1%, 224, 24, 0, 100; event pubdata ENDON
@@ -15,6 +17,8 @@ Rule1
 
 Rule1 1
 
+
+Not used
 # Counter for rainfall
 Rule2
 on Counter#C2!=%var2% do Backlog var2 %value%; event mm ENDON

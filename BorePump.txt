@@ -1,7 +1,24 @@
 rule1 
-on System#Boot do POWER = off; mem2 3600 endon
-
-rule2
+on System#Boot do POWER off; mem2 3600 endon
 ON Power1#state=1 DO RuleTimer1 %mem2% ENDON   
 ON Rules#Timer=1 DO Power1 off ENDON
 on time#minute publish tele/borepump/STATE
+
+# New rule set
+rule1
+on System#Boot do POWER off; mem2 3600 endon
+ON Power1#state=1 DO backlog RuleTimer1 %mem2%; teleperiod 60 ENDON   
+ON Rules#Timer=1 DO backlog Power1 off; teleperiod 300 ENDON 
+on time#minute publish tele/borepump/ruletimer %timer1% endon
+
+
+# New New rule set
+# Power up off
+Setoption0 0 
+RULE1
+ON Power1#state=1 DO Backlog RuleTimer1 %mem2%; Ruletimer2 60 ENDON   
+ON Rules#Timer=1 DO Backlog Power1 off ENDON 
+ON Power1#state=0 DO Backlog ruletimer1 0; ruletimer2 0 ENDON
+on Rules#timer=2 do backlog ruletimer2 60 ENDON
+
+ON Time#Minute DO ruletimer ENDON 

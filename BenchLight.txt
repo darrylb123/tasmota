@@ -1,3 +1,10 @@
 Rule1
 ON system#boot DO backlog power1 %mem1%; mem1 1;ruletimer1 20 endon
 on rules#timer=1 do mem1 0 endon
+
+
+Container light
+Rule1
+on System#Boot do backlog POWER1 off; mem2 3600 endon 
+ON Power1#state=1 DO RuleTimer1 %mem2% ENDON 
+ON Rules#Timer=1 DO Power1 off ENDON
