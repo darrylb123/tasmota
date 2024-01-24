@@ -10,7 +10,7 @@ end
 var speedCur = 0.0
 # Speed limit in mode
 # Limit high = 0
-# Linit low = 1
+# Limit low = 1
 var speedLimMode = 1
 if persist.has("limit")
     speedLimMode = persist.limit
@@ -19,4 +19,5 @@ var speedEngaged = 0
 
 # Load the modules
 load("lvgl.be")
+load("pid.be")
 load("speedo.be")

@@ -15,6 +15,7 @@ var rain_today = 0
 var rain_rate = 0
 var rain_week = 0
 var rain_month = 0
+var rain_year = 0
 var rain_total = 0
 var ten_min_count = 0
 var pulses_per_l = 255.0
@@ -28,7 +29,7 @@ var back = 3
 var pump = 4
 
 def shed_data()
-	var shed_data_msg = json.dump({ "TankLPM":tank_lpm,"TankToday":tank_today,"RainToday":rain_today,"RainRate":rain_rate,"RainWeek":rain_week,"RainMonth":rain_month,"RainTotal":rain_total})
+	var shed_data_msg = json.dump({ "TankLPM":tank_lpm,"TankToday":tank_today,"RainToday":rain_today,"RainRate":rain_rate,"RainWeek":rain_week,"RainMonth":rain_month,"RainTotal":rain_total,"RainYear":rain_year})
 	mqtt.publish("stat/ShedIO/data",shed_data_msg)
 end
 
@@ -53,8 +54,9 @@ def tank_flow()
 end
 
 def rain_gauge()
-	# var pulses_per_mm = 7.75 # 279 pulses for 36mm
-	var pulses_per_mm = 8.66 # 416 pulses for 48mm
+	# var pulses_per_mm = 6.2 # 31 pulses for 5mm
+	# var pulses_per_mm = 8.66
+    var pulses_per_mm = 2.8 # Mysol rain gauge
 	var counter = sensors['COUNTER']['C3']
 	if counter != old_mm_count || ten_min_count > 50
 		if counter<old_mm_count
@@ -68,6 +70,7 @@ def rain_gauge()
 		rain_week = (counter - persist.last_week) / pulses_per_mm
 		rain_month = (counter - persist.last_month) / pulses_per_mm
 		rain_total = counter / pulses_per_mm
+		rain_year = persist.last_year / pulses_per_mm
 		var output_str = string.format("Rainfall Pulses: %d mm: %3.1f",change_count,rain_rate)
 		log(output_str)
 		rain_total = counter / pulses_per_mm
@@ -161,7 +164,6 @@ def water_mgmt()
 		end
 	end
 end
-
 # '{"state": "start","area":"front","timeout":150,"totalLitres":2000, "maxlpm":24}'
 def water_message(topic, idx, payload_s, payload_b)
 	water_msg = json.load(payload_s)
@@ -208,6 +210,8 @@ def each_day()
 	log("Each Day")
 	sensors=json.load(tasmota.read_sensors())
 	var counter = sensors['COUNTER']['C3']
+	var year_avg = persist.last_year/365
+	persist.last_year = persist.last_year + (persist.last_day - counter) - year_avg
 	persist.last_day = counter
 	persist.save()
 end
@@ -236,3 +240,4 @@ tasmota.add_cron("10 0 0 * * *", each_day, "each_day")
 tasmota.add_cron("10 0 0 * * 0", each_week, "each_week")
 tasmota.add_cron("20 0 0 1 * *", each_month, "each_month")
 #######################################################################################
+

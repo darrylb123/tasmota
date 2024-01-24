@@ -1,0 +1,2 @@
+SONOFF RF Bridge
+84:0d:8e:66:0a:22

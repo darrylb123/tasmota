@@ -1,0 +1,34 @@
+template:
+  - sensor:
+      - name: "Total Charging Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state: >
+          {{ [ states('sensor.inverter1qpigs_pv1_charging_power'), 
+               states('sensor.inverter2qpigs_pv1_charging_power') ]
+               | map('float') | sum }}
+        availability: >
+          {{ not 'unavailable' in 
+             [ states('sensor.inverter1qpigs_pv1_charging_power'), 
+               states('sensor.inverter2qpigs_pv1_charging_power') ] }}
+
+
+sensor.sb5_0_1av_41_904_grid_power + 
+sensor.sb4_instant_power + 
+sensor.si8_0h_13_482_battery_power_discharge_total -
+sensor.si8_0h_13_482_battery_power_charge_total
+
+
+# Templates
+# included from configuration.yaml
+# template: !include template.yaml
+  - sensor:
+    - unique_id: calc_off_grid_usage
+      name: "Total Off-grid Power Usage"
+      state: >
+        {{ '%0.1f' | format(states('sensor.sb5_0_1av_41_904_grid_power') | float +
+                     states('sensor.sb4_instant_power') | float +
+                     states('sensor.si8_0h_13_482_battery_power_discharge_total') | float -
+                     states('sensor.si8_0h_13_482_battery_power_charge_total') | float) }}
+      unit_of_measurement: 'W'
+

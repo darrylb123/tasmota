@@ -1,0 +1,7 @@
+# 8 button light switch
+rule 1
+on button1#state do publish cmnd/BenchLights/POWER TOGGLE endon
+on button2#state do publish cmnd/ShedFans/POWER TOGGLE endon
+rule2
+on button3#state do publish cmnd/ContainerLight/POWER TOGGLE endon
+

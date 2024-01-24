@@ -1,0 +1,4 @@
+Rule1
+ON System#BOOT do ruletimer1 1800 endon
+ON Rules#Timer=1 DO backlog Power1 2; ruletimer1 1800 ENDON
+Rule1 1

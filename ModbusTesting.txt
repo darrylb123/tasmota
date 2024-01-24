@@ -1,0 +1,24 @@
+Modbus Testing
+
+backlog power on ;modbussend {"deviceAddress":16, "functionCode":2, "startAddress":8, "type":"bit","count":1,"endian":"lsb" }; power off
+
+
+Dump the hex codes to the screen
+sudo stty -F /dev/ttyUSB0 raw
+sudo stty -F /dev/ttyUSB0 -echo -echoe -echok
+stty -F /dev/ttyUSB0 9600
+cat /dev/ttyUSB0 | hexdump -v -e '/1 "%02X "' -e '/1 "%c\n"'
+
+
+
+pymodbus.console
+
+pymodbus.console --verbose serial --baudrate 9600 --bytesize 8 --parity N --stopbits 1 --port /dev/ttyUSB0
+
+client.read_discrete_inputs  slave 16 address 0 count 8 (0x10 0x2 0x0 0x0 0x0 0x8 0x7a 0x8d)
+client.read_coils address 0 count 8 slave 0x10 (0x10 0x1 0x0 0x0 0x0 0x8 0x3e 0x8d)
+client.write_coil address 0 value 0 slave 16 (0x10 0x5 0x0 0x0 0x0 0x0 0xce 0x8b)
+
+Must ask for count 8, address 0 to get a response
+
+
