@@ -1,0 +1,10 @@
+setoption114 on # decouple switches from outputs
+switchmode1 1 # Set to follow
+Rule1
+ON system#boot DO var1 %mem1% endon
+on time#minute=0 do counter2 0 endon
+on switch1#state=0 do add1 1  endon
+on var1 do mem1 %var1% endon
+
+
+

@@ -56,7 +56,7 @@ end
 def rain_gauge()
 	# var pulses_per_mm = 6.2 # 31 pulses for 5mm
 	# var pulses_per_mm = 8.66
-    var pulses_per_mm = 2.8 # Mysol rain gauge
+    var pulses_per_mm = 3.3 # Mysol rain gauge
 	var counter = sensors['COUNTER']['C3']
 	if counter != old_mm_count || ten_min_count > 50
 		if counter<old_mm_count
