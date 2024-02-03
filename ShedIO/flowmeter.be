@@ -8,15 +8,10 @@ import persist
 var sensors = json.load(tasmota.read_sensors())
 var old_water_count = sensors['COUNTER']['C1']
 var old_tank_count = sensors['COUNTER']['C2']
-var old_mm_count = sensors['COUNTER']['C3']
+
 var tank_lpm = 0
 var tank_today = 0
-var rain_today = 0
-var rain_rate = 0
-var rain_week = 0
-var rain_month = 0
-var rain_year = 0
-var rain_total = 0
+
 var ten_min_count = 0
 var pulses_per_l = 255.0
 # Initialise the json messages, replaced with the real ones later
@@ -29,7 +24,7 @@ var back = 3
 var pump = 4
 
 def shed_data()
-	var shed_data_msg = json.dump({ "TankLPM":tank_lpm,"TankToday":tank_today,"RainToday":rain_today,"RainRate":rain_rate,"RainWeek":rain_week,"RainMonth":rain_month,"RainTotal":rain_total,"RainYear":rain_year})
+	var shed_data_msg = json.dump({ "TankLPM":tank_lpm,"TankToday":tank_today})
 	mqtt.publish("stat/ShedIO/data",shed_data_msg)
 end
 
@@ -53,30 +48,6 @@ def tank_flow()
 	log(output_str)
 end
 
-def rain_gauge()
-	# var pulses_per_mm = 6.2 # 31 pulses for 5mm
-	# var pulses_per_mm = 8.66
-    var pulses_per_mm = 3.3 # Mysol rain gauge
-	var counter = sensors['COUNTER']['C3']
-	if counter != old_mm_count || ten_min_count > 50
-		if counter<old_mm_count
-			old_mm_count = counter
-		end
-
-		var change_count = counter - old_mm_count
-		old_mm_count = counter
-		rain_rate = change_count / pulses_per_mm
-		rain_today = (counter - persist.last_day) / pulses_per_mm
-		rain_week = (counter - persist.last_week) / pulses_per_mm
-		rain_month = (counter - persist.last_month) / pulses_per_mm
-		rain_total = counter / pulses_per_mm
-		rain_year = persist.last_year / pulses_per_mm
-		var output_str = string.format("Rainfall Pulses: %d mm: %3.1f",change_count,rain_rate)
-		log(output_str)
-		rain_total = counter / pulses_per_mm
-		old_mm_count = counter
-	end
-end
 
 # called every 10 seconds
 def water_flow()
@@ -202,42 +173,13 @@ end
 def each_minute()
 	sensors=json.load(tasmota.read_sensors())
 	tank_flow()
-	rain_gauge()
 	shed_data()
 end
 
-def each_day()
-	log("Each Day")
-	sensors=json.load(tasmota.read_sensors())
-	var counter = sensors['COUNTER']['C3']
-	var year_avg = persist.last_year/365
-	persist.last_year = persist.last_year + (persist.last_day - counter) - year_avg
-	persist.last_day = counter
-	persist.save()
-end
-
-def each_week()
-	log("Each Week")
-	sensors=json.load(tasmota.read_sensors())
-	var counter = sensors['COUNTER']['C3']
-	persist.last_week = counter
-	persist.save()
-end
-
-def each_month()
-	log("Each Month")
-	sensors=json.load(tasmota.read_sensors())
-	var counter = sensors['COUNTER']['C3']
-	persist.last_month = counter
-	persist.save()
-end
 
 
 
 tasmota.add_cron("*/10 * * * * *",each_ten_sec,"water_flow")
 tasmota.add_cron("0 * * * * *", each_minute, "each_minute")
-tasmota.add_cron("10 0 0 * * *", each_day, "each_day")
-tasmota.add_cron("10 0 0 * * 0", each_week, "each_week")
-tasmota.add_cron("20 0 0 1 * *", each_month, "each_month")
-#######################################################################################
 
+#######################################################################################
