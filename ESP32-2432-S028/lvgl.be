@@ -88,25 +88,39 @@ onoff_btn.set_pos(220,vres-150)
 onoff_btn.set_size(80, 80)
 onoff_btn.add_style(btn_style, lv.PART_MAIN | lv.STATE_DEFAULT)
 onoff_label = lv.label(onoff_btn)
-if !speedEngaged
+if speedEngaged == 0 # Not engaged
     onoff_btn.set_style_bg_color(lv.color(0x1fa3ec), lv.PART_MAIN | lv.STATE_DEFAULT)
     onoff_label.set_text("Off")                 # set text as Home icon
-else
+elif speedEngaged == 1 # Engaged but not up to speed
+    onoff_btn.set_style_bg_color(lv.color(0xFFFF00), lv.PART_MAIN | lv.STATE_DEFAULT)
+    onoff_label.set_text("En")                 # set text as Home icon
+elif speedEngaged == 2
     onoff_btn.set_style_bg_color(lv.color(0xD00000), lv.PART_MAIN | lv.STATE_DEFAULT)
     onoff_label.set_text("On")                 # set text as Home icon
 end
 onoff_label.center()
 
-# toggle the speed cruise control
-def toggle_engaged()
-    speedEngaged = !speedEngaged
-    if !speedEngaged
+def colourEngaged ()
+    if speedEngaged == 0
         onoff_btn.set_style_bg_color(lv.color(0x1fa3ec), lv.PART_MAIN | lv.STATE_DEFAULT)
         onoff_label.set_text("Off")                 # set text as Home icon
-    else
+    elif speedEngaged == 1
+        onoff_btn.set_style_bg_color(lv.color(0xFFFF00), lv.PART_MAIN | lv.STATE_DEFAULT)
+        onoff_label.set_text("En")                 # set text as Home icon
+    else 
         onoff_btn.set_style_bg_color(lv.color(0xD00000), lv.PART_MAIN | lv.STATE_DEFAULT)
         onoff_label.set_text("On")                 # set text as Home icon
     end
+end
+
+# toggle the speed cruise control
+def toggle_engaged()
+    if  !speedEngaged 
+        speedEngaged = 1
+    else
+        speedEngaged = 0
+    end
+    colourEngaged()
 end
 #- callback function when a button is pressed, react to EVENT_CLICKED event -#
 def btn_clicked_cb(obj, event)
@@ -149,22 +163,16 @@ onoff_btn.add_event_cb(btn_clicked_cb, lv.EVENT_CLICKED, 0)
 def dropdown_changed_cb(obj, event)
     var option = "Unknown"
 
-    var modes = ['Limit High', 'Limit Low' ]
+    var modes = ['Limit', 'Cruise' ]
 
-    var code = event.code
-
-    if code == lv.EVENT_VALUE_CHANGED
-       print("Dropdown code :", code )
-       speedLimMode = obj.get_selected()
-   
-       print("Dropdown set:", modes[speedLimMode])
-       persist.limit = speedLimMode
-       persist.save()
-     end
+    speedLimMode = obj.get_selected()
+    print("Dropdown set:", modes[speedLimMode], speedLimMode)
+    persist.limit = speedLimMode
+    persist.save()
 
 end
 
-var modes = ['Limit High', 'Limit Low' ]
+var modes = ['Limit', 'Cruise' ]
 
 var modes_str = modes.concat('\n')
 ddlist = lv.dropdown(scr)
@@ -172,5 +180,5 @@ ddlist.set_options(modes_str)
 ddlist.set_selected(speedLimMode)
 ddlist.set_pos(20,vres-150)
 # ddlist.center()
-ddlist.add_event_cb(dropdown_changed_cb, lv.EVENT_ALL, None)
+ddlist.add_event_cb(dropdown_changed_cb, lv.EVENT_VALUE_CHANGED, None)
 

@@ -17,7 +17,12 @@ if persist.has("limit")
 end
 var speedEngaged = 0
 
+
+
 # Load the modules
 load("lvgl.be")
 load("pid.be")
 load("speedo.be")
+var sP= speedo()
+
+
