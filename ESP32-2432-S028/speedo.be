@@ -75,12 +75,13 @@ class speedo
         end
             
         
-        if speedEngaged && (speed > (speedSP-2))
+        if speedEngaged &&  ( (speed > (speedSP-2)) || speedLimMode == 0 )
             speedEngaged = 2
             colourEngaged()
+            self.pid.iReset() # Reset integral to 0
         end
         if (speedEngaged == 2)
-            var outp = int(self.pid.Compute(speed,speedSP,tasmota.millis()))
+            var outp = self.actual + int(self.pid.Compute(speed,speedSP,tasmota.millis()))
             if outp < 0
                 outp = 0
             end
@@ -115,6 +116,7 @@ class speedo
         tasmota.add_driver(self) 
         # register fast_loop method
         tasmota.add_fast_loop(/-> self.fast_loop())
+        self.pid.SetParams()
     end
 end
 

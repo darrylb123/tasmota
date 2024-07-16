@@ -18,7 +18,7 @@ class PID
 	    
 	end
 	def Compute(measure, target, now)
-		self.dt = real(now - self.last_time)/3600.0
+		self.dt = real(now - self.last_time)/1000.0
 
 		# Error is what the PID alogithm acts upon to derive the output
 		
@@ -34,7 +34,7 @@ class PID
 		# The integral term sums the errors across many compute calls to allow for
 		# external factors like wind speed and friction
 
-		self.i_error += (error + self.last_error) * self.dt
+		 self.i_error += (error + self.last_error) * self.dt
 
 		# The differential term accounts for the fact that as error approaches 0,
 		# the output needs to be reduced proportionally to ensure factors such as
@@ -58,11 +58,15 @@ class PID
 		self.output = self.p_output  + self.i_output + self.d_output
 		return self.output
 	end
+	def iReset()
+	    self.i_error = 0
+	end
 	def SetParams()
 	    var tasmem = tasmota.cmd("mem")
 	    self.p_gain = number(tasmem['Mem1'])
 	    self.i_gain = number(tasmem['Mem2'])
 	    self.d_gain = number(tasmem['Mem3'])
+	    print("PID Params set")
 	end
 	
 	def Print()
