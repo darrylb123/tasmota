@@ -1,7 +1,7 @@
 # Speed measuring and control
 
 class speedo
-    var spInt, spIntMem, stopped, pin22, count, throttle, demand, actual
+    var spInt, spIntMem, stopped, pin22, count, throttle, demand, actual, engagedMem
     static var tyre_circum = 1.99
     static var p_gain = 5
     static var i_gain = 2
@@ -15,6 +15,9 @@ class speedo
     # 1000 millis for 1 rotation is 1.99m/sec or 7.181km/h
     # requires COUNTERTYPE 1 so that counter is microsecond duration
     
+    # If speed control not engaged, make the output = throttle position
+    # if engaged and limit mode is Limit, use throttle position as output until the speed exceeds the setpoint then control the speed. IE limit maximum speed.
+    # if engaged and cruise mode, limit minimum speed throttle takes over above the speed setpoint
     def every_250ms()
         var position
         if (speedEngaged < 2)
@@ -49,6 +52,7 @@ class speedo
             self.pin22 = true
         end
     end
+    # main speed control loop
     def every_second()
         var speed = 0.0
         # if no update to speedcount in 5 seconds
@@ -61,6 +65,7 @@ class speedo
                 speed = 0.0
             end
         else
+            # calculate speed and display
             self.spIntMem = self.spInt
             self.stopped = 5
             if self.spInt > 0
@@ -71,6 +76,7 @@ class speedo
         # Throttle must be held partly open to maintain cruise control once enabled
         if (speedEngaged == 2) && ((self.throttle < 10) || (speed < 1.0))
             speedEngaged = 1
+            self.engagedMem = false
             colourEngaged()
         end
             
@@ -78,7 +84,10 @@ class speedo
         if speedEngaged &&  ( (speed > (speedSP-2)) || speedLimMode == 0 )
             speedEngaged = 2
             colourEngaged()
-            self.pid.iReset() # Reset integral to 0
+            if !self.engagedMem
+                self.pid.iReset() # Reset integral to 0
+                self.engagedMem = true
+            end
         end
         if (speedEngaged == 2)
             var outp = self.actual + int(self.pid.Compute(speed,speedSP,tasmota.millis()))
@@ -110,6 +119,7 @@ class speedo
         self.stopped = 5
         self.throttle = 0
         self.demand = 0
+        self.engagedMem = false
         self.pid = PID(self.p_gain,self.i_gain,self.d_gain,tasmota.millis())
         gpio.pin_mode(self.wheel,gpio.INPUT_PULLUP)
         gpio.set_pwm(self.pwm_out,0)
@@ -130,7 +140,7 @@ tasmota.add_rule("ANALOG#A1",read_throttle)
 def setp()
     sP.SetParams()
 end
-tasmota.add_rule("mem",setp)
-
-
+tasmota.add_rule("MEM1",setp)
+tasmota.add_rule("MEM2",setp)
+tasmota.add_rule("MEM3",setp)
 
