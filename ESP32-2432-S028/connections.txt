@@ -1,0 +1,17 @@
+Cable pins 
+A - Signal 1 - White
+B - GND      - Green
+C - PS 5V    - Brown
+D - PS 5V    - Red
+E - Signal 2 - Black
+F - GND      - Blue
+
+Internal Connector
+1 - Wheel pulse signal
+2 - Throttle GND
+3 - Throttle 5V
+4 - Throttle Pos Signal 2
+5 - Throttle Pos Signal 1
+6 - Output Signal (Both joined)
+7 - Output 5V
+8 - Output GND
