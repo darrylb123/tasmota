@@ -26,14 +26,14 @@ stat_line.set_align(lv.TEXT_ALIGN_LEFT)                                         
 stat_line.set_style_bg_color(lv.color(0x1fa3ec), lv.PART_MAIN | lv.STATE_DEFAULT)    # background #000088
 stat_line.set_style_bg_opa(lv.OPA_COVER, lv.PART_MAIN | lv.STATE_DEFAULT)            # 100% background opacity
 stat_line.set_style_text_color(lv.color(0xFFFFFF), lv.PART_MAIN | lv.STATE_DEFAULT)  # text color #FFFFFF
-stat_line.set_text(string.format("Speed: %4.1f",speedCur))
+stat_line.set_text(string.format("%4.1f",speedCur))
 stat_line.refr_size()                                                                # new in LVGL8
 stat_line.refr_pos() 
    
 #- Second state line -#
 set_line = lv.label(scr)
 set_line.set_pos(0,40)
-if f28 != nil set_line.set_style_text_font(f20, lv.PART_MAIN | lv.STATE_DEFAULT) end
+if f20 != nil set_line.set_style_text_font(f20, lv.PART_MAIN | lv.STATE_DEFAULT) end
 set_line.set_long_mode(lv.LABEL_LONG_SCROLL)                                        # auto scrolling if text does not fit
 set_line.set_width(hres)
 set_line.set_align(lv.TEXT_ALIGN_LEFT)                                              # align text left
@@ -122,6 +122,7 @@ def toggle_engaged()
     end
     colourEngaged()
 end
+
 #- callback function when a button is pressed, react to EVENT_CLICKED event -#
 def btn_clicked_cb(obj, event)
     var btn = "Unknown"
@@ -151,7 +152,7 @@ def buzzer_enable()
   tasmota.cmd("setoption111 1")
 end
 
-buzzer_enable()
+# buzzer_enable()
 
 
 prev_btn.add_event_cb(btn_clicked_cb, lv.EVENT_CLICKED, 0)
@@ -172,7 +173,7 @@ def dropdown_changed_cb(obj, event)
 
 end
 
-var modes = ['Limit', 'Cruise' ]
+var modes = ['Limit', 'Cruise','Manual' ]
 
 var modes_str = modes.concat('\n')
 ddlist = lv.dropdown(scr)
