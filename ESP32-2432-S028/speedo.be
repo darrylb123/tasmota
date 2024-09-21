@@ -1,7 +1,7 @@
 # Speed measuring and control
 import math
 class speedo
-    var spInt, spIntMem, stopped, pin22, count, throttle, demand, actual, engagedMem, speed, speedFilter
+    var spInt, spIntMem, stopped, pin22, count, throttle, demand, actual, engagedMem, speed, speedFilter, enableControl
     static var tyre_circum = 1.99  / 6 # 6 magnets
     static var p_gain = 5
     static var i_gain = 2
@@ -29,14 +29,12 @@ class speedo
             self.actual = self.throttle
         else
             if speedLimMode == 0  # Limit Speed mode
-            	speedEngaged = 2
                 if ( self.throttle < self.demand )
                     self.actual = self.throttle
                 else
                     self.actual = self.demand
                 end
             elif speedLimMode == 1  # Cruise Speed mode
-            	speedEngaged = 1
                 if ( self.throttle > self.demand )
                     self.actual = self.throttle
                 else
@@ -102,37 +100,38 @@ class speedo
 		set_line.set_text(string.format("Setpoint: %4.1f",speedSP))
 		persist.setpoint = speedSP
 		persist.save()
+		self.enableControl = 0.75 * speedSP
 	elif down
 		speedSP -= 0.5
 		set_line.set_text(string.format("Setpoint: %4.1f",speedSP))
+		
 		persist.setpoint = speedSP
 		persist.save()
+		self.enableControl = 0.75 * speedSP
 	end
 	if limit
 		speedLimMode = 0
 	elif cruise
 		speedLimMode = 1
 	else
+	
 		speedLimMode = 2
+		speedEngaged = 0
+		colourEngaged()
 	end
 	
 	ddlist.set_selected(speedLimMode)
-	if limit || cruise
-		speedEngaged = 1
-	else
-		speedEngaged = 0
-	end
 	
 	colourEngaged ()
         # Throttle must be held partly open to maintain cruise control once enabled
-        if (speedEngaged == 2) && ((self.throttle < 500) || (self.speed < 1.0))
+        if (limit || cruise) && ((self.throttle < 100) || (self.speed < 1.0))
             speedEngaged = 1
             self.engagedMem = false
             colourEngaged()
         end
             
         
-        if speedEngaged &&  ( (self.speed > (speedSP-2)) || speedLimMode == 0 )
+        if ( limit || cruise) &&  (self.speed > self.enableControl)
             speedEngaged = 2
             colourEngaged()
             if !self.engagedMem
@@ -140,6 +139,7 @@ class speedo
                 self.engagedMem = true
             end
         end
+        # if speed is engaged
         if (speedEngaged == 2)
             var outp = self.actual + int(self.pid.Compute(self.speed,speedSP,tasmota.millis()))
             if outp < 0
@@ -147,6 +147,8 @@ class speedo
             end
             self.demand = outp
             self.pid.Print()
+        else
+        	self.demand = self.throttle
         end
         print(string.format("Speed %3.1f Throttle: %d Demand: %d Actual: %d",self.speed,self.throttle, self.demand, self.actual))
         # print("Current Interval",self.spInt)
@@ -187,6 +189,7 @@ class speedo
         self.speed = 0.0
         self.speedFilter = 0
         self.engagedMem = false
+        self.enableControl = 0.75 * speedSP
         self.pid = PID(self.p_gain,self.i_gain,self.d_gain,tasmota.millis())
         gpio.pin_mode(self.wheel,gpio.INPUT_PULLUP)
         gpio.pin_mode(self.limitMode,gpio.INPUT_PULLUP)
