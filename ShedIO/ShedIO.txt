@@ -1,10 +1,7 @@
-setoption114 on # decouple switches from outputs
-switchmode1 1 # Set to follow
-Rule1
-ON system#boot DO var1 %mem1% endon
-on time#minute=0 do counter2 0 endon
-on switch1#state=0 do add1 1  endon
-on var1 do mem1 %var1% endon
+Template
+{"NAME":"ESP32-ShedIO","GPIO":[1,1,1,1,387,7648,1,1,257,256,258,1,260,261,352,353,0,640,608,386,0,262,263,259,0,0,0,0,1,1,1,1,1,0,0,1],"FLAG":0,"BASE":1}
 
-
-
+Rules
+rule1
+on time#minute=0 do backlog counter2 0 endon
+rule1 1

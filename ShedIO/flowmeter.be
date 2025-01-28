@@ -74,6 +74,7 @@ def water_flow()
 	end
 end
 
+
 # start pump function for timing
 def start_pump()
 	tasmota.set_power(pump,true)
@@ -91,7 +92,7 @@ end
 
 # shut down the watering and log
 def end_watering(cause)
-	stop_pump()
+    tasmota.set_timer(1000,stop_pump)
 	tasmota.set_timer(2000,close_valves)
 	log(cause)
 	water_msg['stopcause'] = cause 
@@ -182,4 +183,4 @@ end
 tasmota.add_cron("*/10 * * * * *",each_ten_sec,"water_flow")
 tasmota.add_cron("0 * * * * *", each_minute, "each_minute")
 
-#######################################################################################
+#######################################################################################	
