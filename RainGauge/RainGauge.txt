@@ -1,0 +1,6 @@
+Template
+{"NAME":"ESP32C3RainGauge","GPIO":[1,1,1,1,352,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1],"FLAG":0,"BASE":1}
+
+GPIO4 = Counter 1
+
+CounterDebounce 50
