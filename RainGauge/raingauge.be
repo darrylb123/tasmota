@@ -72,13 +72,89 @@ def rain_month()
 	persist.save()
 end
 
+def ha_autoconfigure()
+# Auto configure Home Assistant
+  var ha_auto = json.dump( {
+  "dev": {
+    "ids": "ccffe2c0547c00",
+    "name": "Rain Gauge",
+    "mf": "darrylb123",
+    "mdl": "AliEx",
+    "sw": "1.0",
+    "sn": "ccffe2c0547c00",
+    "hw": "1.0rev2"
+  },
+  "o": {
+    "name":"Rain Gauge Readings",
+    "sw": "2.1",
+    "url": "https://github.com/darrylb123/tasmota/tree/main/RainGauge"
+  },
+  "cmps": {
+    "rain_total": {
+      "p": "sensor",
+      "name": "Rain Total",
+      "device_class":"precipitation",
+      "unit_of_measurement":"mm",
+      "value_template":"{{ '%0.1f'|format(value_json.RainTotal) }}",
+      "unique_id":"rain_gauge_total"
+    },
+    "rain_today": {
+      "p": "sensor",
+      "name": "Rain Today",
+      "device_class":"precipitation",
+      "unit_of_measurement":"mm",
+      "value_template":"{{ '%0.1f'|format(value_json.RainToday) }}",
+      "unique_id":"rain_gauge_today"
+    },
+    "rain_week": {
+      "p": "sensor",
+      "name": "Rain Week",
+      "device_class":"precipitation",
+      "unit_of_measurement":"mm",
+      "value_template":"{{ '%0.1f'|format(value_json.RainWeek) }}",
+      "unique_id":"rain_gauge_week"
+    },
+    "rain_month": {
+      "p": "sensor",
+      "name": "Rain Month",
+      "device_class":"precipitation",
+      "unit_of_measurement":"mm",
+      "value_template":"{{ '%0.1f'|format(value_json.RainMonth) }}",
+      "unique_id":"rain_gauge_month"
+    },
+    "rain_year": {
+      "p": "sensor",
+      "name": "Rain Year",
+      "device_class":"precipitation",
+      "unit_of_measurement":"mm",
+      "value_template":"{{ '%0.1f'|format(value_json.RainYear) }}",
+      "unique_id":"rain_gauge_year"
+    },
+    "rain_rate": {
+      "p": "sensor",
+      "name": "Rain Rate",
+      "device_class":"precipitation_intensity",
+      "unit_of_measurement":"mm/h",
+      "value_template":"{{ '%0.1f'|format(value_json.RainRate) }}",
+      "unique_id":"rain_gauge_rate"
+    },
+  },
+  "state_topic":"stat/RainGauge/rain",
+  "qos": 2
+} )
 
 
+  mqtt.publish("homeassistant/device/ccffe2c0547c00/config",ha_auto,true)
+end
+
+tasmota.add_rule("Mqtt#Connected",ha_autoconfigure)
 tasmota.add_cron("*/10 * * * * *",rain_ten_sec,"ten_sec")
 tasmota.add_cron("0 */10 * * * *",rain2mqtt,"send_data")
 tasmota.add_cron("0 * * * * *",calc_rate,"each_minute")
 tasmota.add_cron("10 0 0 * * *", rain_day, "each_day")
 tasmota.add_cron("20 0 0 1 * *", rain_month, "each_month")
+
+
 
 # To reset the total
 # persist.RainTotal = persist.RainAtMidnight
