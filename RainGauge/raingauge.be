@@ -8,7 +8,9 @@ var pulses_per_mm = real(3.3)
 # Was 4.5
 
 var rainRate = 0.0
-var counter_no = int(0)
+var counter_1 = int(0)
+var counter_2 = int(1)
+var counter_3 = int(2)
 var rainMem = persist.RainTotal
 var sendMqtt = 0
 var mm_per_pulse = 1/pulses_per_mm
@@ -37,9 +39,29 @@ def calc_rate()
 end
 
 def rain_ten_sec()
-    var counts = gpio.counter_read(counter_no)
-    if counts > 0 
-        gpio.counter_set(counter_no,0)
+    var count1 = gpio.counter_read(counter_1)
+    var count2 = gpio.counter_read(counter_2)
+    var count3 = gpio.counter_read(counter_3)
+    # 2 counters must agree
+    var counts = count1 + count2 + count3
+    if counts > 0
+        if count1 == count2 
+            counts = count1
+        elif count3 == count2
+            counts = count2
+        elif count3 == count1
+            counts = count3
+        else
+            counts = 0
+        end
+        gpio.counter_set(counter_1,0)
+        gpio.counter_set(counter_2,0)
+        gpio.counter_set(counter_3,0)
+    end
+        
+    if counts > 0
+        print(counts)
+
         print( "Rain Counts", counts)
         persist.RainTotal  = persist.RainTotal + ( counts * mm_per_pulse )
         persist.save()

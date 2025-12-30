@@ -1,6 +1,16 @@
 Template
-{"NAME":"ESP32C3RainGauge","GPIO":[1,1,1,1,352,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1],"FLAG":0,"BASE":1}
+{"NAME":"ESP32C3RainGauge","GPIO":[1,1,353,354,352,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1],"FLAG":0,"BASE":1}
 
 GPIO4 = Counter 1
+GPIO2 = Counter 2
+GPIO3 = Counter 3
 
 CounterDebounce 50
+
+backlog counter1 0; counter2 0; counter3 0
+
+
+# To reset the total
+persist.RainTotal = persist.RainAtMidnight
+persist.save()
+
